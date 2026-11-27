@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Cariler - {{ brand }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">Cariler</h1>
+  <a class="btn btn-primary btn-sm" href="{% url 'partners:partner-create' %}">Cari ekle</a>
+</div>
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-4"><input class="form-control" name="q" value="{{ search }}" placeholder="Kod, unvan veya vergi no"></div>
+  <div class="col-md-3">
+    <select class="form-select" name="kind">
+      <option value="">Tümü</option>
+      {% for value, label in kinds %}
+        <option value="{{ value }}" {% if selected_kind == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto"><button class="btn btn-outline-primary">Filtrele</button></div>
+</form>
+<div class="card"><div class="table-responsive">
+  <table class="table table-hover table-sm mb-0">
+    <thead><tr><th>Kod</th><th>Unvan</th><th>Tür</th><th>Telefon</th><th class="text-end">Bakiye</th></tr></thead>
+    <tbody>
+    {% for partner in partners %}
+      <tr>
+        <td class="fw-semibold">{{ partner.code }}</td>
+        <td><a href="{% url 'partners:partner-detail' partner.pk %}">{{ partner.name }}</a></td>
+        <td class="text-muted">{{ partner.get_kind_display }}</td>
+        <td class="text-muted">{{ partner.phone|default:"-" }}</td>
+        <td class="text-end {% if partner.balance > 0 %}negative{% elif partner.balance < 0 %}positive{% endif %}">{{ partner.balance }} ₺</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="5" class="text-center text-muted py-4">Cari yok.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div></div>
+{% include "partials/pagination.html" %}
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Ürünler - {{ brand }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">Ürünler</h1>
+  <div>
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'inventory:category-create' %}">Kategori ekle</a>
+    <a class="btn btn-primary btn-sm" href="{% url 'inventory:product-create' %}">Ürün ekle</a>
+  </div>
+</div>
+
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-4">
+    <input class="form-control" name="q" value="{{ search }}" placeholder="Stok kodu veya ürün adı">
+  </div>
+  <div class="col-md-3">
+    <select class="form-select" name="category">
+      <option value="">Tüm kategoriler</option>
+      {% for category in categories %}
+        <option value="{{ category.pk }}" {% if selected_category == category.pk|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto"><button class="btn btn-outline-primary">Filtrele</button></div>
+</form>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover table-sm mb-0">
+      <thead>
+        <tr><th>Stok kodu</th><th>Ürün</th><th>Kategori</th><th class="text-end">Stok</th>
+            <th class="text-end">Alış</th><th class="text-end">Satış</th><th></th></tr>
+      </thead>
+      <tbody>
+      {% for product in products %}
+        <tr>
+          <td class="fw-semibold">{{ product.sku }}</td>
+          <td>{{ product.name }}</td>
+          <td class="text-muted">{{ product.category.name|default:"-" }}</td>
+          <td class="text-end {% if product.total_qty <= product.reorder_level %}negative{% endif %}">
+            {{ product.total_qty }} {{ product.unit }}
+          </td>
+          <td class="text-end">{{ product.purchase_price }}</td>
+          <td class="text-end">{{ product.sale_price }}</td>
+          <td class="text-end">
+            <a class="btn btn-sm btn-outline-secondary" href="{% url 'inventory:product-update' product.pk %}">Düzenle</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="7" class="text-center text-muted py-4">Ürün yok.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include "partials/pagination.html" %}
+{% endblock %}

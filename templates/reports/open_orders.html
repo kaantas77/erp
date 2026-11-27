@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Açık siparişler - {{ brand }}{% endblock %}
+{% block content %}
+<h1 class="h4 mb-3">Açık siparişler</h1>
+<div class="card"><div class="table-responsive">
+  <table class="table table-sm mb-0">
+    <thead><tr><th>No</th><th>Tarih</th><th>Müşteri</th><th>Depo</th><th>Durum</th><th class="text-end">Tutar</th></tr></thead>
+    <tbody>
+    {% for order in orders %}
+      <tr>
+        <td><a href="{% url 'sales:order-detail' order.pk %}">{{ order.number }}</a></td>
+        <td class="text-muted small">{{ order.order_date|date:"d.m.Y" }}</td>
+        <td>{{ order.partner.name }}</td>
+        <td class="text-muted">{{ order.warehouse.code }}</td>
+        <td>{{ order.get_status_display }}</td>
+        <td class="text-end">{{ order.grand_total }} ₺</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="6" class="text-center text-muted py-4">Açık sipariş yok.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div></div>
+{% endblock %}

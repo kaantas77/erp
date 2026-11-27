@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Stok hareketleri - {{ brand }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">Stok hareketleri</h1>
+  <a class="btn btn-primary btn-sm" href="{% url 'inventory:move-create' %}">Hareket ekle</a>
+</div>
+
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-3">
+    <select class="form-select" name="warehouse">
+      <option value="">Tüm depolar</option>
+      {% for warehouse in warehouses %}
+        <option value="{{ warehouse.pk }}" {% if selected_warehouse == warehouse.pk|stringformat:"s" %}selected{% endif %}>{{ warehouse.code }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-3">
+    <select class="form-select" name="kind">
+      <option value="">Tüm türler</option>
+      {% for value, label in kinds %}
+        <option value="{{ value }}" {% if selected_kind == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto"><button class="btn btn-outline-primary">Filtrele</button></div>
+</form>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover table-sm mb-0">
+      <thead><tr><th>Tarih</th><th>Ürün</th><th>Depo</th><th>Tür</th><th class="text-end">Miktar</th><th>Referans</th><th>Not</th></tr></thead>
+      <tbody>
+      {% for move in moves %}
+        <tr>
+          <td class="text-muted small">{{ move.created_at|date:"d.m.Y H:i" }}</td>
+          <td>{{ move.product.sku }}</td>
+          <td>{{ move.warehouse.code }}</td>
+          <td><span class="badge text-bg-secondary">{{ move.get_kind_display }}</span></td>
+          <td class="text-end {% if move.quantity < 0 %}negative{% else %}positive{% endif %}">{{ move.quantity }}</td>
+          <td>{{ move.reference }}</td>
+          <td class="text-muted small">{{ move.note }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="7" class="text-center text-muted py-4">Hareket yok.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include "partials/pagination.html" %}
+{% endblock %}

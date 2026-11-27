@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Giris - {{ brand }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-4">
+    <div class="card shadow-sm mt-5">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-3">Giris</h1>
+        {% if form.errors %}
+          <div class="alert alert-danger">Kullanici adi veya sifre hatali.</div>
+        {% endif %}
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label" for="id_username">Kullanici adi</label>
+            <input class="form-control" type="text" name="username" id="id_username" autocomplete="username" required autofocus>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="id_password">Sifre</label>
+            <input class="form-control" type="password" name="password" id="id_password" autocomplete="current-password" required>
+          </div>
+          <input type="hidden" name="next" value="{{ next }}">
+          <button class="btn btn-primary w-100" type="submit">Giris yap</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

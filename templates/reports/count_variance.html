@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Sayım farkları - {{ brand }}{% endblock %}
+{% block content %}
+<h1 class="h4 mb-3">Sayım fark raporu</h1>
+<p class="text-muted">Kapatılmış son 50 sayım.</p>
+<div class="card"><div class="table-responsive">
+  <table class="table table-sm mb-0">
+    <thead><tr><th>Sayım no</th><th>Depo</th><th>Kapanış</th><th class="text-end">Farklı satır</th><th class="text-end">Toplam fark</th></tr></thead>
+    <tbody>
+    {% for row in rows %}
+      <tr>
+        <td><a href="{% url 'inventory:count-detail' row.session.pk %}">{{ row.session.number }}</a></td>
+        <td>{{ row.session.warehouse.code }}</td>
+        <td class="text-muted small">{{ row.session.closed_at|date:"d.m.Y H:i"|default:"-" }}</td>
+        <td class="text-end">{{ row.variance_count }}</td>
+        <td class="text-end {% if row.variance %}negative{% endif %}">{{ row.variance }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="5" class="text-center text-muted py-4">Kapatılmış sayım yok.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div></div>
+{% endblock %}

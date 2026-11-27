@@ -1,0 +1,21 @@
+body {
+  font-size: 0.95rem;
+}
+
+.table-sm td,
+.table-sm th {
+  vertical-align: middle;
+}
+
+.stat-card .stat-value {
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.negative {
+  color: #b02a37;
+}
+
+.positive {
+  color: #146c43;
+}

@@ -1,0 +1,43 @@
+[project]
+name = "erp"
+version = "0.1.0"
+description = "Depo, stok, cari, siparis ve fatura yonetimi icin moduler ERP"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+dependencies = [
+    "django>=5.1,<6",
+    "whitenoise>=6.7",
+    "gunicorn>=23",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-django>=4.8",
+    "ruff>=0.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["config", "core", "inventory", "partners", "sales", "billing", "reports"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["test_*.py"]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+exclude = [".venv", ".uv-cache", ".python", "migrations"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "DJ"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"config/settings.py" = ["E402"]

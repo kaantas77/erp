@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Faturalar - {{ brand }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">Faturalar</h1>
+  <a class="btn btn-primary btn-sm" href="{% url 'billing:invoice-create' %}">Fatura ekle</a>
+</div>
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-3">
+    <select class="form-select" name="kind">
+      <option value="">Tüm türler</option>
+      {% for value, label in kinds %}
+        <option value="{{ value }}" {% if selected_kind == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-3">
+    <select class="form-select" name="status">
+      <option value="">Tüm durumlar</option>
+      {% for value, label in statuses %}
+        <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto"><button class="btn btn-outline-primary">Filtrele</button></div>
+</form>
+<div class="card"><div class="table-responsive">
+  <table class="table table-hover table-sm mb-0">
+    <thead><tr><th>No</th><th>Tarih</th><th>Tip</th><th>Cari</th><th>Durum</th><th class="text-end">Tutar</th></tr></thead>
+    <tbody>
+    {% for invoice in invoices %}
+      <tr>
+        <td><a href="{% url 'billing:invoice-detail' invoice.pk %}">{{ invoice.number }}</a></td>
+        <td class="text-muted small">{{ invoice.date|date:"d.m.Y" }}</td>
+        <td class="text-muted">{{ invoice.get_kind_display }}</td>
+        <td>{{ invoice.partner.name }}</td>
+        <td>
+          {% if invoice.status == "draft" %}<span class="badge text-bg-secondary">Taslak</span>
+          {% elif invoice.status == "issued" %}<span class="badge text-bg-info">Kesildi</span>
+          {% elif invoice.status == "paid" %}<span class="badge text-bg-success">Ödendi</span>
+          {% else %}<span class="badge text-bg-danger">İptal</span>{% endif %}
+        </td>
+        <td class="text-end">{{ invoice.grand_total }} ₺</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="6" class="text-center text-muted py-4">Fatura yok.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div></div>
+{% include "partials/pagination.html" %}
+{% endblock %}

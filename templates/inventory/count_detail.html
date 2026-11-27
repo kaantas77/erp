@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{{ session.number }} - {{ brand }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h1 class="h4 mb-0">{{ session.number }}</h1>
+    <div class="text-muted small">
+      {{ session.warehouse.code }} · {{ session.created_at|date:"d.m.Y H:i" }}
+      {% if session.status == "closed" %}<span class="badge text-bg-success ms-1">Kapatıldı</span>
+      {% else %}<span class="badge text-bg-primary ms-1">Açık</span>{% endif %}
+    </div>
+  </div>
+  {% if session.is_open %}
+  <form method="post" action="{% url 'inventory:count-close' session.pk %}"
+        onsubmit="return confirm('Sayım kapatılsın mı? Farklar stok hareketine dönüşecek.');">
+    {% csrf_token %}
+    <button class="btn btn-warning btn-sm" type="submit">Sayımı kapat</button>
+  </form>
+  {% endif %}
+</div>
+
+{% if session.is_open %}
+<form method="post">
+  {% csrf_token %}
+  {{ formset.management_form }}
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table table-sm mb-0">
+        <thead><tr><th>Stok kodu</th><th>Ürün</th><th class="text-end">Sistem</th><th style="width:160px">Sayılan</th><th class="text-end">Fark</th></tr></thead>
+        <tbody>
+        {% for form in formset %}
+          <tr>
+            <td class="fw-semibold">{{ form.instance.product.sku }}</td>
+            <td>{{ form.instance.product.name }}</td>
+            <td class="text-end">{{ form.instance.system_qty }}</td>
+            <td>{{ form.counted_qty }}{{ form.id }}</td>
+            <td class="text-end">
+              {% with variance=form.instance.variance %}
+                {% if variance is None %}<span class="text-muted">-</span>
+                {% elif variance > 0 %}<span class="positive">+{{ variance }}</span>
+                {% elif variance < 0 %}<span class="negative">{{ variance }}</span>
+                {% else %}0{% endif %}
+              {% endwith %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="text-center text-muted py-4">Bu depoda aktif ürün yok.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="mt-3">
+    <button class="btn btn-primary" type="submit">Miktarları kaydet</button>
+    <span class="text-muted small ms-2">Sayılmayan ürünler boş kalabilir, ancak kapatmadan önce hepsi doldurulmalı.</span>
+  </div>
+</form>
+{% else %}
+<div class="card"><div class="table-responsive">
+  <table class="table table-sm mb-0">
+    <thead><tr><th>Stok kodu</th><th>Ürün</th><th class="text-end">Sistem</th><th class="text-end">Sayılan</th><th class="text-end">Fark</th></tr></thead>
+    <tbody>
+    {% for line in lines %}
+      <tr>
+        <td class="fw-semibold">{{ line.product.sku }}</td>
+        <td>{{ line.product.name }}</td>
+        <td class="text-end">{{ line.system_qty }}</td>
+        <td class="text-end">{{ line.counted_qty }}</td>
+        <td class="text-end {% if line.variance %}negative{% endif %}">{{ line.variance|default:"0" }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div></div>
+{% endif %}
+{% endblock %}
