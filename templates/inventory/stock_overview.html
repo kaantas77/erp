@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Mevcut stok - {{ brand }}{% endblock %}
+{% block content %}
+<h1 class="h4 mb-3">Mevcut stok</h1>
+
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-4"><input class="form-control" name="q" value="{{ search }}" placeholder="Stok kodu veya ürün adı"></div>
+  <div class="col-auto">
+    <div class="form-check mt-2">
+      <input class="form-check-input" type="checkbox" name="low" value="1" id="low" {% if low_only %}checked{% endif %}>
+      <label class="form-check-label" for="low">Sadece kritik stok</label>
+    </div>
+  </div>
+  <div class="col-auto"><button class="btn btn-outline-primary">Filtrele</button></div>
+  <div class="col-auto"><a class="btn btn-outline-secondary" href="{% url 'reports:stock-csv' %}?q={{ search }}{% if low_only %}&low=1{% endif %}">CSV indir</a></div>
+</form>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover table-sm mb-0">
+      <thead><tr><th>Stok kodu</th><th>Ürün</th><th>Kategori</th><th class="text-end">Mevcut</th><th class="text-end">Kritik</th></tr></thead>
+      <tbody>
+      {% for product in products %}
+        <tr>
+          <td class="fw-semibold">{{ product.sku }}</td>
+          <td>{{ product.name }}</td>
+          <td class="text-muted">{{ product.category.name|default:"-" }}</td>
+          <td class="text-end {% if product.total_qty <= product.reorder_level %}negative{% endif %}">{{ product.total_qty }} {{ product.unit }}</td>
+          <td class="text-end text-muted">{{ product.reorder_level }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" class="text-center text-muted py-4">Kayıt yok.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include "partials/pagination.html" %}
+{% endblock %}

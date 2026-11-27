@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Sayımlar - {{ brand }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">Sayımlar</h1>
+  <a class="btn btn-primary btn-sm" href="{% url 'inventory:count-start' %}">Yeni sayım</a>
+</div>
+<div class="card"><div class="table-responsive">
+  <table class="table table-hover table-sm mb-0">
+    <thead><tr><th>Sayım no</th><th>Depo</th><th>Durum</th><th class="text-end">Satır</th><th class="text-end">Fark</th><th>Tarih</th><th></th></tr></thead>
+    <tbody>
+    {% for session in sessions %}
+      <tr>
+        <td><a href="{% url 'inventory:count-detail' session.pk %}">{{ session.number }}</a></td>
+        <td>{{ session.warehouse.code }}</td>
+        <td>
+          {% if session.status == "closed" %}<span class="badge text-bg-success">Kapatıldı</span>
+          {% elif session.status == "open" %}<span class="badge text-bg-primary">Açık</span>
+          {% else %}<span class="badge text-bg-secondary">{{ session.get_status_display }}</span>{% endif %}
+        </td>
+        <td class="text-end">{{ session.lines.count }}</td>
+        <td class="text-end {% if session.total_variance %}negative{% endif %}">{{ session.total_variance }}</td>
+        <td class="text-muted small">{{ session.created_at|date:"d.m.Y H:i" }}</td>
+        <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="{% url 'inventory:count-detail' session.pk %}">Aç</a></td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="7" class="text-center text-muted py-4">Sayım yok.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div></div>
+{% endblock %}

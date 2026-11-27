@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - {{ brand }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">Dashboard</h1>
+  <span class="text-muted small">{{ today }}</span>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card h-100"><div class="card-body">
+      <div class="text-muted small">Açık sipariş</div>
+      <div class="stat-value">{{ stats.open_orders }}</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card h-100"><div class="card-body">
+      <div class="text-muted small">Bu ay satış</div>
+      <div class="stat-value">{{ stats.month_sales|floatformat:2 }} ₺</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card h-100"><div class="card-body">
+      <div class="text-muted small">Tahsil edilecek</div>
+      <div class="stat-value">{{ stats.receivables|floatformat:2 }} ₺</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card h-100"><div class="card-body">
+      <div class="text-muted small">Kritik stok</div>
+      <div class="stat-value {% if stats.low_stock %}negative{% endif %}">{{ stats.low_stock }}</div>
+    </div></div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between">
+        <span>Son stok hareketleri</span>
+        <a class="small" href="{% url 'inventory:move-list' %}">Tümü</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead><tr><th>Tarih</th><th>Ürün</th><th>Depo</th><th>Tür</th><th class="text-end">Miktar</th></tr></thead>
+          <tbody>
+          {% for move in recent_moves %}
+            <tr>
+              <td class="text-muted small">{{ move.created_at|date:"d.m.Y H:i" }}</td>
+              <td>{{ move.product.sku }}</td>
+              <td>{{ move.warehouse.code }}</td>
+              <td><span class="badge text-bg-secondary">{{ move.get_kind_display }}</span></td>
+              <td class="text-end {% if move.quantity < 0 %}negative{% else %}positive{% endif %}">
+                {{ move.quantity }}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5" class="text-center text-muted py-4">Henüz hareket yok.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card mb-3">
+      <div class="card-header">Depo değerleri</div>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead><tr><th>Depo</th><th class="text-end">Miktar</th><th class="text-end">Değer</th></tr></thead>
+          <tbody>
+          {% for row in warehouse_values %}
+            <tr>
+              <td>{{ row.warehouse.code }}</td>
+              <td class="text-end">{{ row.quantity }}</td>
+              <td class="text-end">{{ row.value|floatformat:2 }} ₺</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="3" class="text-center text-muted py-4">Depo yok.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header d-flex justify-content-between">
+        <span>Borçlu cariler</span>
+        <a class="small" href="{% url 'reports:partner-balances' %}?debtors=1">Tümü</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead><tr><th>Cari</th><th class="text-end">Bakiye</th></tr></thead>
+          <tbody>
+          {% for row in debtors %}
+            <tr>
+              <td><a href="{% url 'partners:partner-detail' row.partner.pk %}">{{ row.partner.name }}</a></td>
+              <td class="text-end">{{ row.balance|floatformat:2 }} ₺</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="2" class="text-center text-muted py-4">Borçlu cari yok.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
